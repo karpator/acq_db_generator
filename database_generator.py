@@ -7,11 +7,7 @@ from faker import Faker
 
 from column_names import ColumnNameGenerator
 from config import CONFIG
-from generator_definitions import (
-    get_all_generator_names,
-    get_generator_by_name,
-    get_weighted_generator_name,
-)
+from generator_definitions import get_random_generator_weighted
 
 fake = Faker(CONFIG.LANGUAGES)
 
@@ -24,9 +20,6 @@ class DatabaseGenerator:
 
         # Initialize column name generator
         self.column_name_generator = ColumnNameGenerator()
-
-        # Get all available generator names
-        self.available_generators = get_all_generator_names()
 
     def connect(self):
         """Establish connection to SQLite database"""
@@ -64,8 +57,8 @@ class DatabaseGenerator:
 
         for _ in range(num_columns - 1):  # -1 because we already added ID
             # Choose weighted random generator based on type preferences
-            generator_name = get_weighted_generator_name()
-            generator = get_generator_by_name(generator_name)
+            generator = get_random_generator_weighted()
+            generator_name = generator.get_name()
 
             # Generate variant name and ensure uniqueness
             col_name = self.generate_column_name_variant(generator_name)

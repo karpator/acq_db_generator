@@ -5,9 +5,16 @@ Each generator inherits from BaseGenerator and defines its own column names and 
 
 import random
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 
-from config import fake
+from config import CONFIG, fake
+from manipulators import (
+    BaseManipulator,
+    LowercaseManipulator,
+    ManipulatorApplier,
+    NullManipulator,
+    UppercaseManipulator,
+)
 
 
 class BaseGenerator(ABC):
@@ -16,6 +23,12 @@ class BaseGenerator(ABC):
     def __init__(self):
         self.sql_type = self.get_sql_type()
         self.column_names = self.get_column_names()
+        self.manipulator_applier = ManipulatorApplier(self.get_manipulators())
+
+    @abstractmethod
+    def get_name(self) -> str:
+        """Return the unique name identifier for this generator"""
+        pass
 
     @abstractmethod
     def get_sql_type(self) -> str:
@@ -23,14 +36,26 @@ class BaseGenerator(ABC):
         pass
 
     @abstractmethod
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         """Return list of possible column names in multiple languages"""
         pass
 
     @abstractmethod
-    def generate_data(self) -> Any:
-        """Generate a single data value"""
+    def generate_raw_data(self) -> Any:
+        """Generate a single raw data value (before manipulations)"""
         pass
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        """
+        Return a list of manipulators to be applied to the generated data.
+        Override this method in subclasses to define specific manipulators.
+        """
+        return []
+
+    def generate_data(self) -> Any:
+        """Generate data with manipulations applied"""
+        raw_value = self.generate_raw_data()
+        return self.manipulator_applier.apply_manipulations(raw_value, self.sql_type)
 
     def get_random_column_name(self) -> str:
         """Get a random column name from the available options"""
@@ -39,10 +64,13 @@ class BaseGenerator(ABC):
 
 # TEXT Generators
 class NameGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "name"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "name",
@@ -63,15 +91,26 @@ class NameGenerator(BaseGenerator):
             "megjelenito_nev",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.name()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        """Names can be uppercased or lowercased."""
+        return [
+            UppercaseManipulator.create(probability=0.05),
+            LowercaseManipulator.create(probability=0.05),
+            NullManipulator.create(probability=0.02),
+        ]
 
 
 class FirstNameGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "first_name"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "first_name",
@@ -84,15 +123,18 @@ class FirstNameGenerator(BaseGenerator):
             "vezeteknev_elott",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.first_name()
 
 
 class LastNameGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "last_name"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "last_name",
@@ -105,15 +147,18 @@ class LastNameGenerator(BaseGenerator):
             "utolso_nev",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.last_name()
 
 
 class CompanyGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "company"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "company",
@@ -135,15 +180,18 @@ class CompanyGenerator(BaseGenerator):
             "munkaado",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.company()
 
 
 class JobTitleGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "job_title"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "job_title",
@@ -165,15 +213,18 @@ class JobTitleGenerator(BaseGenerator):
             "allasi_hely",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.job()
 
 
 class EmailGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "email"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "email",
@@ -190,15 +241,18 @@ class EmailGenerator(BaseGenerator):
             "kapcsolat_email",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.email()
 
 
 class PhoneGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "phone"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "phone",
@@ -217,15 +271,18 @@ class PhoneGenerator(BaseGenerator):
             "tel_szam",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.phone_number()
 
 
 class AddressGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "address"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "address",
@@ -243,15 +300,18 @@ class AddressGenerator(BaseGenerator):
             "postai_cim",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.address()
 
 
 class CityGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "city"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "city",
@@ -266,15 +326,18 @@ class CityGenerator(BaseGenerator):
             "varosi_terulet",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.city()
 
 
 class CountryGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "country"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "country",
@@ -290,15 +353,18 @@ class CountryGenerator(BaseGenerator):
             "terulet",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.country()
 
 
 class DescriptionGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "description"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "description",
@@ -319,15 +385,18 @@ class DescriptionGenerator(BaseGenerator):
             "eszrevetelek",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.text(max_nb_chars=200)
 
 
 class WebsiteGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "website"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "website",
@@ -346,15 +415,18 @@ class WebsiteGenerator(BaseGenerator):
             "link",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.url()
 
 
 class UsernameGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "username"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "username",
@@ -369,15 +441,18 @@ class UsernameGenerator(BaseGenerator):
             "fiok_nev",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.user_name()
 
 
 class LicensePlateGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "license_plate"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "license_plate",
@@ -391,15 +466,18 @@ class LicensePlateGenerator(BaseGenerator):
             "regisztracio",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.license_plate()
 
 
 class ColorGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "color"
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "color",
@@ -414,16 +492,19 @@ class ColorGenerator(BaseGenerator):
             "szinezes",
         ]
 
-    def generate_data(self) -> str:
+    def generate_raw_data(self) -> str:
         return fake.color_name()
 
 
 # INTEGER Generators
 class AgeGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "age"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "age",
@@ -437,15 +518,18 @@ class AgeGenerator(BaseGenerator):
             "jelenlegi_kor",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(18, 90)
 
 
 class SalaryGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "salary"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "salary",
@@ -466,15 +550,18 @@ class SalaryGenerator(BaseGenerator):
             "juttatas",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(30000, 150000)
 
 
 class EmployeeIdGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "employee_id"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "employee_id",
@@ -490,15 +577,18 @@ class EmployeeIdGenerator(BaseGenerator):
             "szemelyzeti_szam",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(1000, 9999)
 
 
 class QuantityGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "quantity"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "quantity",
@@ -515,15 +605,18 @@ class QuantityGenerator(BaseGenerator):
             "osszesen",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(1, 1000)
 
 
 class YearGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "year"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "year",
@@ -537,15 +630,18 @@ class YearGenerator(BaseGenerator):
             "kezdo_ev",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(1950, 2024)
 
 
 class ScoreGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "score"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "score",
@@ -561,15 +657,18 @@ class ScoreGenerator(BaseGenerator):
             "osztályzat",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(0, 100)
 
 
 class RatingGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "rating"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "rating",
@@ -585,15 +684,18 @@ class RatingGenerator(BaseGenerator):
             "minosites",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(1, 5)
 
 
 class OrderCountGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "order_count"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "order_count",
@@ -607,15 +709,18 @@ class OrderCountGenerator(BaseGenerator):
             "vetel_szam",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(0, 50)
 
 
 class DaysActiveGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "days_active"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "days_active",
@@ -628,15 +733,18 @@ class DaysActiveGenerator(BaseGenerator):
             "bejelentkezesi_napok",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(0, 365)
 
 
 class ViewsGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "views"
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "views",
@@ -651,16 +759,19 @@ class ViewsGenerator(BaseGenerator):
             "talalatok",
         ]
 
-    def generate_data(self) -> int:
+    def generate_raw_data(self) -> int:
         return random.randint(0, 1000000)
 
 
 # REAL Generators
 class PriceGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "price"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "price",
@@ -678,15 +789,18 @@ class PriceGenerator(BaseGenerator):
             "dij",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(10.0, 1000.0), 2)
 
 
 class WeightGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "weight"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "weight",
@@ -700,15 +814,18 @@ class WeightGenerator(BaseGenerator):
             "teher",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(0.1, 100.0), 2)
 
 
 class HeightGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "height"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "height",
@@ -721,15 +838,18 @@ class HeightGenerator(BaseGenerator):
             "tenger_feletti_magassag",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(1.50, 2.10), 2)
 
 
 class TemperatureGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "temperature"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "temperature",
@@ -743,15 +863,18 @@ class TemperatureGenerator(BaseGenerator):
             "termikus_ertek",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(-10.0, 40.0), 1)
 
 
 class PercentageGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "percentage"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "percentage",
@@ -766,15 +889,18 @@ class PercentageGenerator(BaseGenerator):
             "hanyad",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(0.0, 100.0), 2)
 
 
 class LatitudeGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "latitude"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "latitude",
@@ -787,15 +913,18 @@ class LatitudeGenerator(BaseGenerator):
             "szelessegi_fok",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(-90.0, 90.0), 6)
 
 
 class LongitudeGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "longitude"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "longitude",
@@ -809,15 +938,18 @@ class LongitudeGenerator(BaseGenerator):
             "hosszusagi_fok",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(-180.0, 180.0), 6)
 
 
 class DiscountGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "discount"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "discount",
@@ -832,15 +964,18 @@ class DiscountGenerator(BaseGenerator):
             "engedmeny",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(0.0, 0.5), 3)
 
 
 class TaxRateGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "tax_rate"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "tax_rate",
@@ -853,15 +988,18 @@ class TaxRateGenerator(BaseGenerator):
             "adozasi_rata",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(0.05, 0.25), 3)
 
 
 class ExchangeRateGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "exchange_rate"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> list[str]:
+    def get_column_names(self) -> List[str]:
         return [
             # English
             "exchange_rate",
@@ -874,136 +1012,106 @@ class ExchangeRateGenerator(BaseGenerator):
             "deviza_arfolyam",
         ]
 
-    def generate_data(self) -> float:
+    def generate_raw_data(self) -> float:
         return round(random.uniform(0.1, 5.0), 4)
 
 
 # Registry of all available generators
-AVAILABLE_GENERATORS: dict[str, type[BaseGenerator]] = {
+AVAILABLE_GENERATORS: List[type[BaseGenerator]] = [
     # TEXT generators
-    "name": NameGenerator,
-    "first_name": FirstNameGenerator,
-    "last_name": LastNameGenerator,
-    "company": CompanyGenerator,
-    "job_title": JobTitleGenerator,
-    "email": EmailGenerator,
-    "phone": PhoneGenerator,
-    "address": AddressGenerator,
-    "city": CityGenerator,
-    "country": CountryGenerator,
-    "description": DescriptionGenerator,
-    "website": WebsiteGenerator,
-    "username": UsernameGenerator,
-    "license_plate": LicensePlateGenerator,
-    "color": ColorGenerator,
+    NameGenerator,
+    FirstNameGenerator,
+    LastNameGenerator,
+    CompanyGenerator,
+    JobTitleGenerator,
+    EmailGenerator,
+    PhoneGenerator,
+    AddressGenerator,
+    CityGenerator,
+    CountryGenerator,
+    DescriptionGenerator,
+    WebsiteGenerator,
+    UsernameGenerator,
+    LicensePlateGenerator,
+    ColorGenerator,
     # INTEGER generators
-    "age": AgeGenerator,
-    "salary": SalaryGenerator,
-    "employee_id": EmployeeIdGenerator,
-    "quantity": QuantityGenerator,
-    "year": YearGenerator,
-    "score": ScoreGenerator,
-    "rating": RatingGenerator,
-    "order_count": OrderCountGenerator,
-    "days_active": DaysActiveGenerator,
-    "views": ViewsGenerator,
+    AgeGenerator,
+    SalaryGenerator,
+    EmployeeIdGenerator,
+    QuantityGenerator,
+    YearGenerator,
+    ScoreGenerator,
+    RatingGenerator,
+    OrderCountGenerator,
+    DaysActiveGenerator,
+    ViewsGenerator,
     # REAL generators
-    "price": PriceGenerator,
-    "weight": WeightGenerator,
-    "height": HeightGenerator,
-    "temperature": TemperatureGenerator,
-    "percentage": PercentageGenerator,
-    "latitude": LatitudeGenerator,
-    "longitude": LongitudeGenerator,
-    "discount": DiscountGenerator,
-    "tax_rate": TaxRateGenerator,
-    "exchange_rate": ExchangeRateGenerator,
-}
+    PriceGenerator,
+    WeightGenerator,
+    HeightGenerator,
+    TemperatureGenerator,
+    PercentageGenerator,
+    LatitudeGenerator,
+    LongitudeGenerator,
+    DiscountGenerator,
+    TaxRateGenerator,
+    ExchangeRateGenerator,
+]
 
 
 def get_generator_by_name(generator_name: str) -> BaseGenerator:
     """Get a generator instance by its name"""
-    if generator_name not in AVAILABLE_GENERATORS:
-        raise ValueError(f"Unknown generator: {generator_name}")
+    for generator_class in AVAILABLE_GENERATORS:
+        generator_instance = generator_class()
+        if generator_instance.get_name() == generator_name:
+            return generator_instance
 
-    generator_class = AVAILABLE_GENERATORS[generator_name]
-    return generator_class()
+    raise ValueError(f"Unknown generator: {generator_name}")
 
 
-def get_generators_by_type(sql_type: str) -> list[str]:
-    """Get all generator names for a specific SQL type"""
-    generators: list[str] = []
-    for name, generator_class in AVAILABLE_GENERATORS.items():
-        instance = generator_class()
-        if instance.get_sql_type() == sql_type:
-            generators.append(name)
+def get_generators_by_type(sql_type: str) -> List[BaseGenerator]:
+    """Get all generator instances for a specific SQL type"""
+    generators: List[BaseGenerator] = []
+    for generator_class in AVAILABLE_GENERATORS:
+        generator_instance = generator_class()
+        if generator_instance.get_sql_type() == sql_type:
+            generators.append(generator_instance)
     return generators
 
 
-def get_all_generator_names() -> list[str]:
+def get_all_generator_names() -> List[str]:
     """Get all available generator names"""
-    return list(AVAILABLE_GENERATORS.keys())
+    names: List[str] = []
+    for generator_class in AVAILABLE_GENERATORS:
+        generator_instance = generator_class()
+        names.append(generator_instance.get_name())
+    return names
 
 
-def get_weighted_generator_name() -> str:
-    """Get a random generator name based on SQL type weights"""
-    from config import CONFIG
+def get_random_generator_weighted() -> BaseGenerator:
+    """Get a random generator instance based on SQL type weights"""
+    # Define weights for each SQL type
+    type_weights = {
+        "TEXT": CONFIG.GENERATOR_WEIGHTS.TEXT_WEIGHT,
+        "INTEGER": CONFIG.GENERATOR_WEIGHTS.INTEGER_WEIGHT,
+        "REAL": CONFIG.GENERATOR_WEIGHTS.REAL_WEIGHT,
+    }
 
-    # Get all generators grouped by type
-    text_generators = get_generators_by_type("TEXT")
-    integer_generators = get_generators_by_type("INTEGER")
-    real_generators = get_generators_by_type("REAL")
+    # Create a weighted list of types
+    weighted_types: List[str] = []
+    for sql_type, weight in type_weights.items():
+        weighted_types.extend(
+            [sql_type] * int(weight * 10)
+        )  # Multiply by 10 for better distribution
 
-    # Create weighted choices based on configuration
-    choices: list[str] = []
-    weights: list[float] = []
+    # Select a random type based on weights
+    selected_type = random.choice(weighted_types)
 
-    # Add TEXT generators with their weight
-    choices.extend(text_generators)
-    weights.extend([CONFIG.GENERATOR_WEIGHTS.TEXT_WEIGHT] * len(text_generators))
+    # Get all generators for that type
+    generators_for_type = get_generators_by_type(selected_type)
 
-    # Add INTEGER generators with their weight
-    choices.extend(integer_generators)
-    weights.extend([CONFIG.GENERATOR_WEIGHTS.INTEGER_WEIGHT] * len(integer_generators))
+    # Return a random generator from that list
+    if not generators_for_type:
+        raise ValueError(f"No generators found for SQL type: {selected_type}")
 
-    # Add REAL generators with their weight
-    choices.extend(real_generators)
-    weights.extend([CONFIG.GENERATOR_WEIGHTS.REAL_WEIGHT] * len(real_generators))
-
-    # Use random.choices for weighted selection
-    return random.choices(choices, weights=weights, k=1)[0]
-
-
-# Example usage and testing
-if __name__ == "__main__":
-    print("=== Generator Definitions Demo ===\n")
-
-    # Test each SQL type
-    for sql_type in ["TEXT", "INTEGER", "REAL"]:
-        print(f"SQL Type: {sql_type}")
-        print("-" * 30)
-
-        generators = get_generators_by_type(sql_type)
-        for gen_name in generators[:3]:  # Show first 3 generators
-            gen = get_generator_by_name(gen_name)
-            print(f"Generator: {gen_name}")
-            print(f"  Column names: {', '.join(gen.get_column_names()[:5])}...")
-            print(f"  Sample data: {[gen.generate_data() for _ in range(3)]}")
-        print()
-
-    # Test weighted generator selection
-    print("=== Weighted Generator Selection Demo ===")
-    print("Generating 100 random generators using weights...")
-    print("Current weights: TEXT=1.0, INTEGER=2.0, REAL=1.0")
-    print("-" * 50)
-
-    type_counts = {"TEXT": 0, "INTEGER": 0, "REAL": 0}
-    for _ in range(100):
-        gen_name = get_weighted_generator_name()
-        gen = get_generator_by_name(gen_name)
-        type_counts[gen.get_sql_type()] += 1
-
-    print("Results after 100 selections:")
-    for sql_type, count in type_counts.items():
-        print(f"  {sql_type}: {count} ({count}%)")
-    print("\nNote: INTEGER should appear roughly twice as often as TEXT and REAL")
+    return random.choice(generators_for_type)
