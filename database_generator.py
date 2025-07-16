@@ -39,15 +39,17 @@ class DatabaseGenerator:
 
     def generate_table_schema(
         self, table_name: str
-    ) -> Tuple[str, List[Tuple[str, str, Any]]]:
+    ) -> Tuple[str, List[Tuple[str, str, str, Any]]]:
         """Generate a random table schema with column names and types"""
-        num_columns = random.randint(3, 8)
+        num_columns = random.randint(CONFIG.MIN_COLUMNS_PER_TABLE, CONFIG.MAX_COLUMNS_PER_TABLE)
         columns: list[str] = []
-        column_definitions: list[Tuple[str, str, Any]] = []
+        column_definitions: list[Tuple[str, str, str, Any]] = []
 
         # Always add an ID column
         columns.append("id INTEGER PRIMARY KEY AUTOINCREMENT")
-        column_definitions.append(("id", "id", lambda: None))  # ID is auto-generated
+        column_definitions.append(
+            ("id", "id", "", lambda: None)
+        )  # ID is auto-generated
 
         used_names = set(["id"])
 
@@ -55,6 +57,7 @@ class DatabaseGenerator:
             # Choose weighted random generator based on type preferences
             generator = get_random_generator_weighted()
             generator_name = generator.get_name()
+            generator_label = generator.get_label()
 
             # Generate variant name and ensure uniqueness
             col_name = self.column_name_generator.get_random_column_name(generator)
@@ -65,17 +68,24 @@ class DatabaseGenerator:
 
             used_names.add(col_name)
             columns.append(f"{col_name} {generator.sql_type}")
-            column_definitions.append((col_name, generator_name, generator))
+            column_definitions.append(
+                (col_name, generator_name, generator_label, generator)
+            )
 
         schema = f"CREATE TABLE {table_name} ({', '.join(columns)})"
         return schema, column_definitions
 
     def generate_row_data(
-        self, column_definitions: list[Tuple[str, str, Any]]
+        self, column_definitions: list[Tuple[str, str, str, Any]]
     ) -> list[Any]:
         """Generate data for a single row"""
         row_data: list[Any] = []
-        for col_name, _generator_name, generator in column_definitions:
+        for (
+            col_name,
+            _generator_name,
+            _generator_label,
+            generator,
+        ) in column_definitions:
             if col_name == "id":
                 continue  # Skip ID as it's auto-generated
 
@@ -96,10 +106,10 @@ class DatabaseGenerator:
         schema, column_definitions = self.generate_table_schema(table_name)
 
         # Log generator usage for each column (except ID)
-        for col_name, generator_name, _ in column_definitions:
+        for col_name, generator_name, generator_label, _ in column_definitions:
             if col_name != "id":  # Skip ID column
                 self.result_handler.log_generator_usage(
-                    generator_name, table_name, col_name
+                    generator_name, generator_label, table_name, col_name
                 )
 
         # Create table
@@ -116,7 +126,7 @@ class DatabaseGenerator:
         print(f"Generating {num_rows} rows...")
 
         # Prepare INSERT statement
-        non_id_columns = [col for col, _, _ in column_definitions if col != "id"]
+        non_id_columns = [col for col, _, _, _ in column_definitions if col != "id"]
         placeholders = ", ".join(["?" for _ in non_id_columns])
         insert_sql = f"INSERT INTO {table_name} ({', '.join(non_id_columns)}) VALUES ({placeholders})"
 

@@ -31,6 +31,14 @@ class BaseGenerator(ABC):
     def get_name(self) -> str:
         """Return the unique name identifier for this generator"""
         pass
+    
+    def get_label(self) -> str:
+        """
+        Return a descriptive label for the generator class.
+        By default, this is the same as get_name(),
+        Note: The label does not have to be unique.
+        """
+        return self.get_name()
 
     @abstractmethod
     def get_sql_type(self) -> str:
@@ -218,6 +226,9 @@ class JobTitleGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "job_title"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "TEXT"
 
@@ -316,7 +327,10 @@ class PhoneGenerator(BaseGenerator):
 
 class AddressGenerator(BaseGenerator):
     def get_name(self) -> str:
-        return "address"
+        return "address_personal"
+    
+    def get_label(self) -> str:
+        return "address_personal"
 
     def get_sql_type(self) -> str:
         return "TEXT"
@@ -344,6 +358,14 @@ class AddressGenerator(BaseGenerator):
 
     def get_manipulators(self) -> List[BaseManipulator]:
         return create_test_manipulator()
+    
+
+class AddressGenerator2(AddressGenerator):
+    def get_name(self) -> str:
+        return "address_company"
+
+    def get_label(self) -> str:
+        return "address_company"
 
 
 class CityGenerator(BaseGenerator):
@@ -533,6 +555,9 @@ class LicensePlateGenerator(BaseGenerator):
 class ColorGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "color"
+    
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "TEXT"
@@ -563,6 +588,9 @@ class ColorGenerator(BaseGenerator):
 class AgeGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "age"
+    
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "INTEGER"
@@ -591,6 +619,9 @@ class AgeGenerator(BaseGenerator):
 class SalaryGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "salary"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "INTEGER"
@@ -657,6 +688,9 @@ class QuantityGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "quantity"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
@@ -688,6 +722,9 @@ class YearGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "year"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
@@ -715,6 +752,9 @@ class YearGenerator(BaseGenerator):
 class ScoreGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "score"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "INTEGER"
@@ -746,6 +786,9 @@ class RatingGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "rating"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
@@ -776,6 +819,9 @@ class OrderCountGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "order_count"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
@@ -804,6 +850,9 @@ class DaysActiveGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "days_active"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "INTEGER"
 
@@ -830,6 +879,9 @@ class DaysActiveGenerator(BaseGenerator):
 class ViewsGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "views"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "INTEGER"
@@ -860,6 +912,9 @@ class ViewsGenerator(BaseGenerator):
 class PriceGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "price"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -893,6 +948,9 @@ class WeightGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "weight"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "REAL"
 
@@ -921,6 +979,9 @@ class HeightGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "height"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "REAL"
 
@@ -947,6 +1008,9 @@ class HeightGenerator(BaseGenerator):
 class TemperatureGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "temperature"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -975,6 +1039,9 @@ class TemperatureGenerator(BaseGenerator):
 class PercentageGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "percentage"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -1005,6 +1072,9 @@ class LatitudeGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "latitude"
 
+    def get_label(self) -> str:
+        return "coordinate_part"
+
     def get_sql_type(self) -> str:
         return "REAL"
 
@@ -1031,6 +1101,9 @@ class LatitudeGenerator(BaseGenerator):
 class LongitudeGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "longitude"
+
+    def get_label(self) -> str:
+        return "coordinate_part"
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -1059,6 +1132,9 @@ class LongitudeGenerator(BaseGenerator):
 class DiscountGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "discount"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -1089,6 +1165,9 @@ class TaxRateGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "tax_rate"
 
+    def get_label(self) -> str:
+        return ""
+
     def get_sql_type(self) -> str:
         return "REAL"
 
@@ -1115,6 +1194,9 @@ class TaxRateGenerator(BaseGenerator):
 class ExchangeRateGenerator(BaseGenerator):
     def get_name(self) -> str:
         return "exchange_rate"
+
+    def get_label(self) -> str:
+        return ""
 
     def get_sql_type(self) -> str:
         return "REAL"
@@ -1256,6 +1338,7 @@ AVAILABLE_GENERATORS: List[type[BaseGenerator]] = [
     EmailGenerator,
     PhoneGenerator,
     AddressGenerator,
+    AddressGenerator2,
     CityGenerator,
     CountryGenerator,
     DescriptionGenerator,
@@ -1275,12 +1358,12 @@ AVAILABLE_GENERATORS: List[type[BaseGenerator]] = [
     # OrderCountGenerator,
     # DaysActiveGenerator,
     # ViewsGenerator,
-    # CustomerIDGenerator,
+    CustomerIDGenerator,
     OrderIDGenerator,
     BankAccountNumberGenerator,
 
     # REAL generators
-    # PriceGenerator,
+    PriceGenerator,
     # WeightGenerator,
     # HeightGenerator,
     TemperatureGenerator,
