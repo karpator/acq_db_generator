@@ -8,23 +8,21 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, TypeVar
 
-
-@dataclass
-class ManipulatorConfig:
-    """Configuration for a manipulator including its probability"""
-
-    probability: float = 0.0  # 0.0 to 1.0 - chance this manipulator will be applied
-    params: Dict[str, Any] = field(default_factory=dict)  # type: ignore
-
-
 # TypeVar for the BaseManipulator and its subclasses
 T = TypeVar("T", bound="BaseManipulator")
 
 
 class BaseManipulator(ABC):
+    @dataclass
+    class Config:
+        """Configuration for a manipulator including its probability"""
+
+        probability: float = 0.0  # 0.0 to 1.0 - chance this manipulator will be applied
+        params: Dict[str, Any] = field(default_factory=dict)  # type: ignore
+
     """Abstract base class for all data manipulators"""
 
-    def __init__(self, config: ManipulatorConfig):
+    def __init__(self, config: Config):
         self.config = config
 
     @classmethod
@@ -34,7 +32,7 @@ class BaseManipulator(ABC):
         """Factory method to create a manipulator instance with given probability and parameters"""
         if params is None:
             params = {}
-        config = ManipulatorConfig(probability=probability, params=params)
+        config = BaseManipulator.Config(probability=probability, params=params)
         return cls(config)
 
     @abstractmethod
@@ -55,6 +53,36 @@ class BaseManipulator(ABC):
     def should_apply(self) -> bool:
         """Check if this manipulator should be applied based on probability"""
         return random.random() < self.config.probability
+
+
+class ManipulatorFactory:
+    @staticmethod
+    def create(
+        manipulator_with_probs: list[tuple[BaseManipulator, float]],
+    ) -> list[BaseManipulator]:
+        """
+        Create a manipulator instance based on the provided type and probability
+
+        Args:
+            manipulator_with_probs: List of tuples containing a manipulator instance and its probability
+
+        Returns:
+            List of manipulator instances that should be applied based on their probabilities
+
+        Example:
+        ```python
+        manipulators = ManipulatorFactory.create([
+            (UppercaseManipulator.create(probability=0.05), 0.05),
+            (LowercaseManipulator.create(probability=0.05), 0.05),
+            (NullManipulator.create(probability=0.02), 0.02),
+        ])
+        ```
+        """
+        instances: list[BaseManipulator] = []
+        for manipulator, probability in manipulator_with_probs:
+            if random.random() < probability:
+                instances.append(manipulator)  # Use the already created instance
+        return instances
 
 
 # NULL Manipulator - Works with all types
@@ -221,20 +249,27 @@ class ManipulatorApplier:
             m for m in self.manipulators if m.can_apply_to_type(sql_type)
         ]
 
-        # Check for NULL first - if NULL is applied, return None immediately
+        # Check for NULL manipulator first (special case)
         null_manipulators = [
-            m for m in applicable_manipulators if isinstance(m, NullManipulator)
+            m
+            for m in applicable_manipulators
+            if isinstance(m, NullManipulator) and m.should_apply()
         ]
-        for manipulator in null_manipulators:
-            if manipulator.should_apply():
-                return manipulator.apply(value)
 
-        # Apply other manipulations
-        for manipulator in applicable_manipulators:
-            if (
-                not isinstance(manipulator, NullManipulator)
-                and manipulator.should_apply()
-            ):
-                value = manipulator.apply(value)
+        # If a NULL manipulator should apply, return None immediately
+        if null_manipulators:
+            return None
+
+        # Check which non-NULL manipulators should apply based on their probability
+        eligible_manipulators = [
+            m
+            for m in applicable_manipulators
+            if not isinstance(m, NullManipulator) and m.should_apply()
+        ]
+
+        # If multiple manipulators are eligible, randomly select one to make it fair
+        if eligible_manipulators:
+            selected_manipulator = random.choice(eligible_manipulators)
+            value = selected_manipulator.apply(value)
 
         return value

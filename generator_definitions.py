@@ -12,6 +12,7 @@ from manipulators import (
     BaseManipulator,
     LowercaseManipulator,
     ManipulatorApplier,
+    ManipulatorFactory,
     NullManipulator,
     UppercaseManipulator,
 )
@@ -62,6 +63,26 @@ class BaseGenerator(ABC):
         return random.choice(self.column_names)
 
 
+def create_test_manipulator() -> list[BaseManipulator]:
+    """Create a test manipulator for demonstration purposes"""
+    return ManipulatorFactory.create(
+        [
+            (
+                NullManipulator.create(probability=0.1),
+                0.5,
+            ),
+            (
+                UppercaseManipulator.create(probability=0.3),
+                1.0,
+            ),
+            (
+                LowercaseManipulator.create(probability=0.3),
+                1.0,
+            ),
+        ]
+    )
+
+
 # TEXT Generators
 class NameGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -95,12 +116,7 @@ class NameGenerator(BaseGenerator):
         return fake.name()
 
     def get_manipulators(self) -> List[BaseManipulator]:
-        """Names can be uppercased or lowercased."""
-        return [
-            UppercaseManipulator.create(probability=0.05),
-            LowercaseManipulator.create(probability=0.05),
-            NullManipulator.create(probability=0.02),
-        ]
+        return create_test_manipulator()
 
 
 class FirstNameGenerator(BaseGenerator):
@@ -126,6 +142,9 @@ class FirstNameGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.first_name()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class LastNameGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -149,6 +168,9 @@ class LastNameGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> str:
         return fake.last_name()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class CompanyGenerator(BaseGenerator):
@@ -183,6 +205,9 @@ class CompanyGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.company()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class JobTitleGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -216,6 +241,9 @@ class JobTitleGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.job()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class EmailGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -243,6 +271,9 @@ class EmailGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> str:
         return fake.email()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class PhoneGenerator(BaseGenerator):
@@ -274,6 +305,9 @@ class PhoneGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.phone_number()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class AddressGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -303,6 +337,9 @@ class AddressGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.address()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class CityGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -328,6 +365,9 @@ class CityGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> str:
         return fake.city()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class CountryGenerator(BaseGenerator):
@@ -355,6 +395,9 @@ class CountryGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> str:
         return fake.country()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class DescriptionGenerator(BaseGenerator):
@@ -388,6 +431,9 @@ class DescriptionGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.text(max_nb_chars=200)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class WebsiteGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -418,6 +464,9 @@ class WebsiteGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.url()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class UsernameGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -444,6 +493,9 @@ class UsernameGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.user_name()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class LicensePlateGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -468,6 +520,9 @@ class LicensePlateGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> str:
         return fake.license_plate()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class ColorGenerator(BaseGenerator):
@@ -495,6 +550,9 @@ class ColorGenerator(BaseGenerator):
     def generate_raw_data(self) -> str:
         return fake.color_name()
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 # INTEGER Generators
 class AgeGenerator(BaseGenerator):
@@ -520,6 +578,9 @@ class AgeGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> int:
         return random.randint(18, 90)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class SalaryGenerator(BaseGenerator):
@@ -553,6 +614,9 @@ class SalaryGenerator(BaseGenerator):
     def generate_raw_data(self) -> int:
         return random.randint(30000, 150000)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class EmployeeIdGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -579,6 +643,9 @@ class EmployeeIdGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> int:
         return random.randint(1000, 9999)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class QuantityGenerator(BaseGenerator):
@@ -608,6 +675,9 @@ class QuantityGenerator(BaseGenerator):
     def generate_raw_data(self) -> int:
         return random.randint(1, 1000)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class YearGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -632,6 +702,9 @@ class YearGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> int:
         return random.randint(1950, 2024)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class ScoreGenerator(BaseGenerator):
@@ -660,6 +733,9 @@ class ScoreGenerator(BaseGenerator):
     def generate_raw_data(self) -> int:
         return random.randint(0, 100)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class RatingGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -687,6 +763,9 @@ class RatingGenerator(BaseGenerator):
     def generate_raw_data(self) -> int:
         return random.randint(1, 5)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class OrderCountGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -712,6 +791,9 @@ class OrderCountGenerator(BaseGenerator):
     def generate_raw_data(self) -> int:
         return random.randint(0, 50)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class DaysActiveGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -735,6 +817,9 @@ class DaysActiveGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> int:
         return random.randint(0, 365)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class ViewsGenerator(BaseGenerator):
@@ -761,6 +846,9 @@ class ViewsGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> int:
         return random.randint(0, 1000000)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 # REAL Generators
@@ -792,6 +880,9 @@ class PriceGenerator(BaseGenerator):
     def generate_raw_data(self) -> float:
         return round(random.uniform(10.0, 1000.0), 2)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class WeightGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -817,6 +908,9 @@ class WeightGenerator(BaseGenerator):
     def generate_raw_data(self) -> float:
         return round(random.uniform(0.1, 100.0), 2)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class HeightGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -840,6 +934,9 @@ class HeightGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> float:
         return round(random.uniform(1.50, 2.10), 2)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class TemperatureGenerator(BaseGenerator):
@@ -865,6 +962,9 @@ class TemperatureGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> float:
         return round(random.uniform(-10.0, 40.0), 1)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class PercentageGenerator(BaseGenerator):
@@ -892,6 +992,9 @@ class PercentageGenerator(BaseGenerator):
     def generate_raw_data(self) -> float:
         return round(random.uniform(0.0, 100.0), 2)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class LatitudeGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -915,6 +1018,9 @@ class LatitudeGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> float:
         return round(random.uniform(-90.0, 90.0), 6)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class LongitudeGenerator(BaseGenerator):
@@ -940,6 +1046,9 @@ class LongitudeGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> float:
         return round(random.uniform(-180.0, 180.0), 6)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 class DiscountGenerator(BaseGenerator):
@@ -967,6 +1076,9 @@ class DiscountGenerator(BaseGenerator):
     def generate_raw_data(self) -> float:
         return round(random.uniform(0.0, 0.5), 3)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class TaxRateGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -991,6 +1103,9 @@ class TaxRateGenerator(BaseGenerator):
     def generate_raw_data(self) -> float:
         return round(random.uniform(0.05, 0.25), 3)
 
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
 
 class ExchangeRateGenerator(BaseGenerator):
     def get_name(self) -> str:
@@ -1014,6 +1129,9 @@ class ExchangeRateGenerator(BaseGenerator):
 
     def generate_raw_data(self) -> float:
         return round(random.uniform(0.1, 5.0), 4)
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 
 # Registry of all available generators
