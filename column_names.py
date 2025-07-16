@@ -3,16 +3,15 @@ import string
 from typing import List
 from config import CONFIG
 
-from generator_definitions import get_all_generator_names, get_generator_by_name
+from generator_definitions import BaseGenerator, get_all_generator_names
 
 
 class ColumnNameGenerator:
     """Generates column names with multi-language support and optional character modifications"""
 
-    def get_random_column_name(self, generator_name: str) -> str:
+    def get_random_column_name(self, generator: BaseGenerator) -> str:
         """Get a random column name for the specified generator"""
         try:
-            generator = get_generator_by_name(generator_name)
             base_name = generator.get_random_column_name()
 
             # Apply modifications based on probability
@@ -22,7 +21,7 @@ class ColumnNameGenerator:
             return base_name
         except ValueError:
             # Fallback for unknown generators
-            return f"unknown_{generator_name}"
+            return f"unknown_{generator.get_name()}"
 
     def _modify_column_name(self, name: str) -> str:
         """Apply random modifications to a column name"""

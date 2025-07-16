@@ -36,11 +36,6 @@ class DatabaseGenerator:
         if self.connection:
             self.connection.close()
             print("Database connection closed")
-
-    def generate_column_name_variant(self, generator_name: str) -> str:
-        """Generate a column name using the column name generator"""
-        return self.column_name_generator.get_random_column_name(generator_name)
-
     def generate_table_schema(
         self, table_name: str
     ) -> Tuple[str, List[Tuple[str, str, Any]]]:
@@ -61,11 +56,11 @@ class DatabaseGenerator:
             generator_name = generator.get_name()
 
             # Generate variant name and ensure uniqueness
-            col_name = self.generate_column_name_variant(generator_name)
+            col_name = self.column_name_generator.get_random_column_name(generator)
             counter = 1
             while col_name in used_names:
                 col_name = (
-                    f"{self.generate_column_name_variant(generator_name)}_{counter}"
+                    f"{self.column_name_generator.get_random_column_name(generator)}_{counter}"
                 )
                 counter += 1
 
