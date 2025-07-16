@@ -21,7 +21,7 @@ class DatabaseGenerator:
 
         # Initialize column name generator
         self.column_name_generator = ColumnNameGenerator()
-        
+
         # Initialize result handler
         self.result_handler = ResultHandler(db_name)
 
@@ -40,6 +40,7 @@ class DatabaseGenerator:
         if self.connection:
             self.connection.close()
             print("Database connection closed")
+
     def generate_table_schema(
         self, table_name: str
     ) -> Tuple[str, List[Tuple[str, str, Any]]]:
@@ -63,9 +64,7 @@ class DatabaseGenerator:
             col_name = self.column_name_generator.get_random_column_name(generator)
             counter = 1
             while col_name in used_names:
-                col_name = (
-                    f"{self.column_name_generator.get_random_column_name(generator)}_{counter}"
-                )
+                col_name = f"{self.column_name_generator.get_random_column_name(generator)}_{counter}"
                 counter += 1
 
             used_names.add(col_name)
@@ -103,7 +102,9 @@ class DatabaseGenerator:
         # Log generator usage for each column (except ID)
         for col_name, generator_name, _ in column_definitions:
             if col_name != "id":  # Skip ID column
-                self.result_handler.log_generator_usage(generator_name, table_name, col_name)
+                self.result_handler.log_generator_usage(
+                    generator_name, table_name, col_name
+                )
 
         # Create table
         try:
@@ -172,10 +173,10 @@ class DatabaseGenerator:
             self.create_table(table_name)
 
         self.close()
-        
+
         # Finalize results - copy database and save generator log
         self.result_handler.finalize_results(self.db_name)
-        
+
         print("\nDatabase generation completed!")
         print(f"Database file: {self.db_name}")
         print(f"Results saved in: {self.result_handler.get_result_folder_path()}")
