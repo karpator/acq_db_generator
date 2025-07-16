@@ -1,32 +1,13 @@
 import random
 import string
-from dataclasses import dataclass
 from typing import List
+from config import CONFIG
 
 from generator_definitions import get_all_generator_names, get_generator_by_name
 
 
-@dataclass
-class ColumnNameConfig:
-    """Configuration for column name generation and modification"""
-
-    modification_probability: float = 0.2  # 20% chance to modify column name
-    modification_intensity: float = (
-        0.3  # How much to modify (0.0 = minimal, 1.0 = heavy)
-    )
-
-    # Character modification weights
-    char_flip_weight: float = 0.4  # Probability to flip a character
-    char_add_weight: float = 0.3  # Probability to add a random character
-    char_remove_weight: float = 0.2  # Probability to remove a character
-    char_replace_weight: float = 0.1  # Probability to replace a character
-
-
 class ColumnNameGenerator:
     """Generates column names with multi-language support and optional character modifications"""
-
-    def __init__(self, config: ColumnNameConfig | None = None):
-        self.config = config or ColumnNameConfig()
 
     def get_random_column_name(self, generator_name: str) -> str:
         """Get a random column name for the specified generator"""
@@ -35,7 +16,7 @@ class ColumnNameGenerator:
             base_name = generator.get_random_column_name()
 
             # Apply modifications based on probability
-            if random.random() < self.config.modification_probability:
+            if random.random() < CONFIG.COLUMN_NAME.MODIFICATION_PROBABILITY:
                 return self._modify_column_name(base_name)
 
             return base_name
@@ -50,7 +31,7 @@ class ColumnNameGenerator:
 
         # Determine how many modifications to apply based on intensity
         num_modifications = max(
-            1, int(len(name) * self.config.modification_intensity * 0.3)
+            1, int(len(name) * CONFIG.COLUMN_NAME.MODIFICATION_INTENSITY * 0.3)
         )
 
         modified_name = name
@@ -63,10 +44,10 @@ class ColumnNameGenerator:
     def _choose_modification_type(self) -> str:
         """Choose a random modification type based on weights"""
         choices = [
-            ("flip", self.config.char_flip_weight),
-            ("add", self.config.char_add_weight),
-            ("remove", self.config.char_remove_weight),
-            ("replace", self.config.char_replace_weight),
+            ("flip", CONFIG.COLUMN_NAME.CHAR_FLIP_WEIGHT),
+            ("add", CONFIG.COLUMN_NAME.CHAR_ADD_WEIGHT),
+            ("remove", CONFIG.COLUMN_NAME.CHAR_REMOVE_WEIGHT),
+            ("replace", CONFIG.COLUMN_NAME.CHAR_REPLACE_WEIGHT),
         ]
 
         # Weighted random choice
@@ -133,48 +114,3 @@ class ColumnNameGenerator:
         """Get all available generator names"""
         return get_all_generator_names()
 
-    def set_modification_config(self, config: ColumnNameConfig) -> None:
-        """Update the modification configuration"""
-        self.config = config
-
-
-# Factory function for easy usage
-def create_column_name_generator(
-    modification_probability: float = 0.2, modification_intensity: float = 0.3
-) -> ColumnNameGenerator:
-    """Create a ColumnNameGenerator with custom configuration"""
-    config = ColumnNameConfig(
-        modification_probability=modification_probability,
-        modification_intensity=modification_intensity,
-    )
-    return ColumnNameGenerator(config)
-
-
-# Example usage and testing
-if __name__ == "__main__":
-    # Create generator with default settings
-    generator = ColumnNameGenerator()
-
-    print("=== Column Name Generator Demo ===\n")
-
-    # Test some generators
-    test_generators = ["name", "age", "price", "company", "email"]
-
-    for gen_name in test_generators:
-        print(f"Generator: {gen_name}")
-        names = []
-        for _ in range(5):  # Generate 5 names for each generator
-            name = generator.get_random_column_name(gen_name)
-            names.append(name)
-        print(f"  Generated names: {', '.join(names)}")
-        print()
-
-    # Test with high modification settings
-    print("=== High Modification Demo ===\n")
-    high_mod_generator = create_column_name_generator(
-        modification_probability=0.8, modification_intensity=0.7
-    )
-
-    for _ in range(10):
-        name = high_mod_generator.get_random_column_name("name")
-        print(f"Modified name: {name}")

@@ -5,12 +5,8 @@ Each generator inherits from BaseGenerator and defines its own column names and 
 
 import random
 from abc import ABC, abstractmethod
-from typing import Any, List
-
-from faker import Faker
-
-# Initialize Faker with multiple locales
-fake = Faker(["en", "hu"])
+from config import fake
+from typing import Any
 
 
 class BaseGenerator(ABC):
@@ -26,7 +22,7 @@ class BaseGenerator(ABC):
         pass
 
     @abstractmethod
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         """Return list of possible column names in multiple languages"""
         pass
 
@@ -45,7 +41,7 @@ class NameGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "name",
@@ -74,7 +70,7 @@ class FirstNameGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "first_name",
@@ -95,7 +91,7 @@ class LastNameGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "last_name",
@@ -116,7 +112,7 @@ class CompanyGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "company",
@@ -146,7 +142,7 @@ class JobTitleGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "job_title",
@@ -176,7 +172,7 @@ class EmailGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "email",
@@ -201,7 +197,7 @@ class PhoneGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "phone",
@@ -228,7 +224,7 @@ class AddressGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "address",
@@ -254,7 +250,7 @@ class CityGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "city",
@@ -277,7 +273,7 @@ class CountryGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "country",
@@ -301,7 +297,7 @@ class DescriptionGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "description",
@@ -330,7 +326,7 @@ class WebsiteGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "website",
@@ -357,7 +353,7 @@ class UsernameGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "username",
@@ -380,7 +376,7 @@ class LicensePlateGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "license_plate",
@@ -402,7 +398,7 @@ class ColorGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "TEXT"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "color",
@@ -426,7 +422,7 @@ class AgeGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "age",
@@ -448,7 +444,7 @@ class SalaryGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "salary",
@@ -477,7 +473,7 @@ class EmployeeIdGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "employee_id",
@@ -501,7 +497,7 @@ class QuantityGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "quantity",
@@ -526,7 +522,7 @@ class YearGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "year",
@@ -548,7 +544,7 @@ class ScoreGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "score",
@@ -572,7 +568,7 @@ class RatingGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "rating",
@@ -596,7 +592,7 @@ class OrderCountGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "order_count",
@@ -618,7 +614,7 @@ class DaysActiveGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "days_active",
@@ -639,7 +635,7 @@ class ViewsGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "INTEGER"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "views",
@@ -663,7 +659,7 @@ class PriceGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "price",
@@ -689,7 +685,7 @@ class WeightGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "weight",
@@ -711,7 +707,7 @@ class HeightGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "height",
@@ -732,7 +728,7 @@ class TemperatureGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "temperature",
@@ -754,7 +750,7 @@ class PercentageGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "percentage",
@@ -777,7 +773,7 @@ class LatitudeGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "latitude",
@@ -798,7 +794,7 @@ class LongitudeGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "longitude",
@@ -820,7 +816,7 @@ class DiscountGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "discount",
@@ -843,7 +839,7 @@ class TaxRateGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "tax_rate",
@@ -864,7 +860,7 @@ class ExchangeRateGenerator(BaseGenerator):
     def get_sql_type(self) -> str:
         return "REAL"
 
-    def get_column_names(self) -> List[str]:
+    def get_column_names(self) -> list[str]:
         return [
             # English
             "exchange_rate",
@@ -882,7 +878,7 @@ class ExchangeRateGenerator(BaseGenerator):
 
 
 # Registry of all available generators
-AVAILABLE_GENERATORS = {
+AVAILABLE_GENERATORS: dict[str, type[BaseGenerator]] = {
     # TEXT generators
     "name": NameGenerator,
     "first_name": FirstNameGenerator,
@@ -933,9 +929,9 @@ def get_generator_by_name(generator_name: str) -> BaseGenerator:
     return generator_class()
 
 
-def get_generators_by_type(sql_type: str) -> List[str]:
+def get_generators_by_type(sql_type: str) -> list[str]:
     """Get all generator names for a specific SQL type"""
-    generators = []
+    generators: list[str] = []
     for name, generator_class in AVAILABLE_GENERATORS.items():
         instance = generator_class()
         if instance.get_sql_type() == sql_type:
@@ -943,7 +939,7 @@ def get_generators_by_type(sql_type: str) -> List[str]:
     return generators
 
 
-def get_all_generator_names() -> List[str]:
+def get_all_generator_names() -> list[str]:
     """Get all available generator names"""
     return list(AVAILABLE_GENERATORS.keys())
 
