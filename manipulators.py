@@ -99,6 +99,17 @@ class NullManipulator(BaseManipulator):
         return "NULL"
 
 
+class TrashManipulator(BaseManipulator):
+    def can_apply_to_type(self, sql_type: str) -> bool:
+        return True
+    
+    def apply(self, value: Any) -> Any:
+        vals = ["NULL", "-", "n.a", "N/A", " ", ""]
+        return random.choice(vals)
+    
+    def get_name(self) -> str:
+        return "TRASH"
+
 # Text Manipulators
 class UppercaseManipulator(BaseManipulator):
     """Converts text to uppercase"""

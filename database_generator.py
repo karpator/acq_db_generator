@@ -76,10 +76,6 @@ class DatabaseGenerator:
         schema = f"CREATE TABLE {table_name} ({', '.join(columns)})"
         return schema, column_definitions
 
-    def should_be_null(self) -> bool:
-        """Determine if a value should be NULL based on probability"""
-        return random.random() < CONFIG.NULL_PROBABILITY
-
     def generate_row_data(
         self, column_definitions: list[Tuple[str, str, Any]]
     ) -> list[Any]:
@@ -89,15 +85,12 @@ class DatabaseGenerator:
             if col_name == "id":
                 continue  # Skip ID as it's auto-generated
 
-            if self.should_be_null():
+            try:
+                value = generator.generate_data()
+                row_data.append(value)
+            except Exception as e:
+                print(f"Error generating data for {col_name}: {e}")
                 row_data.append(None)
-            else:
-                try:
-                    value = generator.generate_data()
-                    row_data.append(value)
-                except Exception as e:
-                    print(f"Error generating data for {col_name}: {e}")
-                    row_data.append(None)
 
         return row_data
 
@@ -159,7 +152,6 @@ class DatabaseGenerator:
         print(
             f"  - Rows per table: {CONFIG.MIN_ROWS_PER_TABLE}-{CONFIG.MAX_ROWS_PER_TABLE}"
         )
-        print(f"  - NULL probability: {CONFIG.NULL_PROBABILITY * 100}%")
         print(f"  - Languages: {CONFIG.LANGUAGES}")
 
         self.connect()

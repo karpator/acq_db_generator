@@ -14,6 +14,7 @@ from manipulators import (
     ManipulatorApplier,
     ManipulatorFactory,
     NullManipulator,
+    TrashManipulator,
     UppercaseManipulator,
 )
 
@@ -68,15 +69,19 @@ def create_test_manipulator() -> list[BaseManipulator]:
     return ManipulatorFactory.create(
         [
             (
-                NullManipulator.create(probability=0.1),
-                0.5,
+                NullManipulator.create(probability=0.3),
+                0.75,
             ),
             (
-                UppercaseManipulator.create(probability=0.3),
+                TrashManipulator.create(probability=0.3),
                 1.0,
             ),
             (
-                LowercaseManipulator.create(probability=0.3),
+                UppercaseManipulator.create(probability=0.1),
+                1.0,
+            ),
+            (
+                LowercaseManipulator.create(probability=0.05),
                 1.0,
             ),
         ]
@@ -1133,6 +1138,112 @@ class ExchangeRateGenerator(BaseGenerator):
     def get_manipulators(self) -> List[BaseManipulator]:
         return create_test_manipulator()
 
+class CustomerIDGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "customer_id"
+
+    def get_sql_type(self) -> str:
+        return "INTEGER"
+
+    def get_column_names(self) -> List[str]:
+        return [
+            "customer_id",
+            "customer_identifier",
+            "customer_primary_id",
+            "client_id",
+            "client_identifier",
+            "client_primary_id",
+            "user_id",
+            "user_identifier",
+            "user_primary_id",
+            "account_id",
+            "account_identifier",
+            "account_primary_id",
+            "member_id",
+            "member_identifier",
+            # hungarian
+            "ugyfel_id",
+            "ugyfel_azonosito",
+            "ugyfel_fo_id",
+            "kliens_id",
+            "kliens_azonosito",
+            "kliens_fo_id",
+            "felhasznalo_id",
+            "felhasznalo_azonosito",
+            "felhasznalo_fo_id",
+        ]
+
+    def generate_raw_data(self) -> int:
+        prefix = random.choice([18, 72])
+        suffix = random.randint(100000, 999999)
+        return int(f"{prefix}{suffix}") 
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+
+
+class OrderIDGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "order_id"
+
+    def get_sql_type(self) -> str:
+        return "INTEGER"
+
+    def get_column_names(self) -> List[str]:
+        return [
+            "order_id",
+            "order_number",
+            "purchase_id",
+            "transaction_id",
+            "sales_id",
+            "order_reference",
+            "order_primary_id",
+            "purchase_reference",
+            "transaction_reference",
+            # hungarian
+            "rendeles_id",
+            "rendeles_szam",
+            "vasarlas_id",
+            "tranzakcio_id",
+            "eladas_id",
+            "rendeles_hivatkozas",
+            "rendeles_fo_id",
+        ]
+
+    def generate_raw_data(self) -> int:
+        prefix = random.choice([12, 92])
+        suffix = random.randint(100000, 999999)
+        return int(f"{prefix}{suffix}")
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
+    
+class BankAccountNumberGenerator(BaseGenerator):
+    def get_name(self) -> str:
+        return "bank_account_number"
+
+    def get_sql_type(self) -> str:
+        return "TEXT"
+
+    def get_column_names(self) -> List[str]:
+        return [
+            "bank_account_number",
+            "account_number",
+            "iban",
+            "bank_account",
+            "financial_account",
+            # Hungarian
+            "bankszamla_szam",
+            "szamlaszam",
+            "iban_szam",
+            "penzugyi_szamla",
+        ]
+
+    def generate_raw_data(self) -> str:
+        return fake.bban()
+
+    def get_manipulators(self) -> List[BaseManipulator]:
+        return create_test_manipulator()
 
 # Registry of all available generators
 AVAILABLE_GENERATORS: List[type[BaseGenerator]] = [
@@ -1152,28 +1263,33 @@ AVAILABLE_GENERATORS: List[type[BaseGenerator]] = [
     UsernameGenerator,
     LicensePlateGenerator,
     ColorGenerator,
+
     # INTEGER generators
     AgeGenerator,
-    SalaryGenerator,
+    # SalaryGenerator,
     EmployeeIdGenerator,
     QuantityGenerator,
     YearGenerator,
-    ScoreGenerator,
-    RatingGenerator,
-    OrderCountGenerator,
-    DaysActiveGenerator,
-    ViewsGenerator,
+    # ScoreGenerator,
+    # RatingGenerator,
+    # OrderCountGenerator,
+    # DaysActiveGenerator,
+    # ViewsGenerator,
+    # CustomerIDGenerator,
+    OrderIDGenerator,
+    BankAccountNumberGenerator,
+
     # REAL generators
-    PriceGenerator,
-    WeightGenerator,
-    HeightGenerator,
+    # PriceGenerator,
+    # WeightGenerator,
+    # HeightGenerator,
     TemperatureGenerator,
-    PercentageGenerator,
+    # PercentageGenerator,
     LatitudeGenerator,
     LongitudeGenerator,
-    DiscountGenerator,
-    TaxRateGenerator,
-    ExchangeRateGenerator,
+    # DiscountGenerator,
+    # TaxRateGenerator,
+    # ExchangeRateGenerator,
 ]
 
 
