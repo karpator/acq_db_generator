@@ -8,6 +8,7 @@ from faker import Faker
 from column_names import ColumnNameGenerator
 from config import CONFIG
 from generator_definitions import get_random_generator_weighted
+from result_handler import ResultHandler
 
 fake = Faker(CONFIG.LANGUAGES)
 
@@ -20,6 +21,9 @@ class DatabaseGenerator:
 
         # Initialize column name generator
         self.column_name_generator = ColumnNameGenerator()
+        
+        # Initialize result handler
+        self.result_handler = ResultHandler(db_name)
 
     def connect(self):
         """Establish connection to SQLite database"""
@@ -96,6 +100,11 @@ class DatabaseGenerator:
         # Generate schema
         schema, column_definitions = self.generate_table_schema(table_name)
 
+        # Log generator usage for each column (except ID)
+        for col_name, generator_name, _ in column_definitions:
+            if col_name != "id":  # Skip ID column
+                self.result_handler.log_generator_usage(generator_name, table_name, col_name)
+
         # Create table
         try:
             self.cursor.execute(f"DROP TABLE IF EXISTS {table_name}")  # type: ignore
@@ -149,6 +158,9 @@ class DatabaseGenerator:
         )
         print(f"  - Languages: {CONFIG.LANGUAGES}")
 
+        # Create result folder structure
+        self.result_handler.create_result_folder()
+
         self.connect()
 
         # Generate random number of tables
@@ -160,8 +172,13 @@ class DatabaseGenerator:
             self.create_table(table_name)
 
         self.close()
+        
+        # Finalize results - copy database and save generator log
+        self.result_handler.finalize_results(self.db_name)
+        
         print("\nDatabase generation completed!")
         print(f"Database file: {self.db_name}")
+        print(f"Results saved in: {self.result_handler.get_result_folder_path()}")
 
     def show_database_info(self) -> None:
         """Display information about the generated database"""
