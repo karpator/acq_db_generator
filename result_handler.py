@@ -34,16 +34,6 @@ class ResultHandler:
         """Log which generator created which column"""
         self.generator_log.append((generator_name, table_name, column_name))
 
-    def copy_database_file(self, source_db_path: str) -> None:
-        """Copy the generated database file to the result folder"""
-        source_path = Path(source_db_path)
-        if source_path.exists():
-            destination_path = self.result_folder_path / f"{self.database_name}.sqlite"
-            shutil.copy2(source_path, destination_path)
-            print(f"Copied database to: {destination_path}")
-        else:
-            print(f"Warning: Source database file not found: {source_db_path}")
-
     def save_generator_log(self) -> None:
         """Save the generator log to a text file"""
         log_file_path = self.result_folder_path / f"{self.database_name}_generators.txt"
@@ -55,11 +45,14 @@ class ResultHandler:
 
         print(f"Generator log saved to: {log_file_path}")
 
-    def finalize_results(self, source_db_path: str) -> None:
-        """Finalize the results by copying database and saving logs"""
-        self.copy_database_file(source_db_path)
+    def finalize_results(self) -> None:
+        """Finalize the results by saving logs"""
         self.save_generator_log()
         print(f"Results finalized in: {self.result_folder_path}")
+
+    def get_database_path(self) -> str:
+        """Get the full path where the database should be created"""
+        return str(self.result_folder_path / f"{self.database_name}.sqlite")
 
     def get_result_folder_path(self) -> Path:
         """Get the path to the result folder"""

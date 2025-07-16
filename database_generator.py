@@ -18,11 +18,7 @@ class DatabaseGenerator:
         self.db_name = db_name
         self.connection = None
         self.cursor = None
-
-        # Initialize column name generator
         self.column_name_generator = ColumnNameGenerator()
-
-        # Initialize result handler
         self.result_handler = ResultHandler(db_name)
 
     def connect(self):
@@ -162,6 +158,9 @@ class DatabaseGenerator:
         # Create result folder structure
         self.result_handler.create_result_folder()
 
+        # Update database path to be in the results folder
+        self.db_name = self.result_handler.get_database_path()
+
         self.connect()
 
         # Generate random number of tables
@@ -174,8 +173,8 @@ class DatabaseGenerator:
 
         self.close()
 
-        # Finalize results - copy database and save generator log
-        self.result_handler.finalize_results(self.db_name)
+        # Finalize results - save generator log
+        self.result_handler.finalize_results()
 
         print("\nDatabase generation completed!")
         print(f"Database file: {self.db_name}")
