@@ -7,7 +7,11 @@ from faker import Faker
 
 from column_names import ColumnNameGenerator
 from config import CONFIG
-from generator_definitions import get_all_generator_names, get_generator_by_name
+from generator_definitions import (
+    get_all_generator_names,
+    get_generator_by_name,
+    get_weighted_generator_name,
+)
 
 fake = Faker(CONFIG.LANGUAGES)
 
@@ -59,8 +63,8 @@ class DatabaseGenerator:
         used_names = set(["id"])
 
         for _ in range(num_columns - 1):  # -1 because we already added ID
-            # Choose random generator
-            generator_name = random.choice(self.available_generators)
+            # Choose weighted random generator based on type preferences
+            generator_name = get_weighted_generator_name()
             generator = get_generator_by_name(generator_name)
 
             # Generate variant name and ensure uniqueness

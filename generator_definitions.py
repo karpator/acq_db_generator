@@ -5,8 +5,9 @@ Each generator inherits from BaseGenerator and defines its own column names and 
 
 import random
 from abc import ABC, abstractmethod
-from config import fake
 from typing import Any
+
+from config import fake
 
 
 class BaseGenerator(ABC):
@@ -944,6 +945,35 @@ def get_all_generator_names() -> list[str]:
     return list(AVAILABLE_GENERATORS.keys())
 
 
+def get_weighted_generator_name() -> str:
+    """Get a random generator name based on SQL type weights"""
+    from config import CONFIG
+
+    # Get all generators grouped by type
+    text_generators = get_generators_by_type("TEXT")
+    integer_generators = get_generators_by_type("INTEGER")
+    real_generators = get_generators_by_type("REAL")
+
+    # Create weighted choices based on configuration
+    choices: list[str] = []
+    weights: list[float] = []
+
+    # Add TEXT generators with their weight
+    choices.extend(text_generators)
+    weights.extend([CONFIG.GENERATOR_WEIGHTS.TEXT_WEIGHT] * len(text_generators))
+
+    # Add INTEGER generators with their weight
+    choices.extend(integer_generators)
+    weights.extend([CONFIG.GENERATOR_WEIGHTS.INTEGER_WEIGHT] * len(integer_generators))
+
+    # Add REAL generators with their weight
+    choices.extend(real_generators)
+    weights.extend([CONFIG.GENERATOR_WEIGHTS.REAL_WEIGHT] * len(real_generators))
+
+    # Use random.choices for weighted selection
+    return random.choices(choices, weights=weights, k=1)[0]
+
+
 # Example usage and testing
 if __name__ == "__main__":
     print("=== Generator Definitions Demo ===\n")
@@ -960,3 +990,20 @@ if __name__ == "__main__":
             print(f"  Column names: {', '.join(gen.get_column_names()[:5])}...")
             print(f"  Sample data: {[gen.generate_data() for _ in range(3)]}")
         print()
+
+    # Test weighted generator selection
+    print("=== Weighted Generator Selection Demo ===")
+    print("Generating 100 random generators using weights...")
+    print("Current weights: TEXT=1.0, INTEGER=2.0, REAL=1.0")
+    print("-" * 50)
+
+    type_counts = {"TEXT": 0, "INTEGER": 0, "REAL": 0}
+    for _ in range(100):
+        gen_name = get_weighted_generator_name()
+        gen = get_generator_by_name(gen_name)
+        type_counts[gen.get_sql_type()] += 1
+
+    print("Results after 100 selections:")
+    for sql_type, count in type_counts.items():
+        print(f"  {sql_type}: {count} ({count}%)")
+    print("\nNote: INTEGER should appear roughly twice as often as TEXT and REAL")
