@@ -9,7 +9,7 @@ class COLUMN_NAME_CONFIG:
     """Configuration for column name generation and modification"""
 
     MODIFICATION_PROBABILITY: float = 0.1
-    MODIFICATION_INTENSITY: float = 0.3
+    MODIFICATION_INTENSITY: float = 0.2
 
     # Character modification weights
     CHAR_FLIP_WEIGHT: float = 0.4  # Probability to flip a character
@@ -21,21 +21,19 @@ class COLUMN_NAME_CONFIG:
 @dataclass
 class GENERATOR_TYPE_WEIGHTS:
     """Configuration for generator type selection weights"""
-
-    TEXT_WEIGHT: float = 4.0  # Weight for TEXT generators
-    INTEGER_WEIGHT: float = 2.0  # Weight for INTEGER generators (higher = more likely)
-    REAL_WEIGHT: float = 1.0  # Weight for REAL generators
+    TEXT_WEIGHT: float = 14.0  # Weight for TEXT generators
+    INTEGER_WEIGHT: float = 6.0  # Weight for INTEGER generators (higher = more likely)
+    REAL_WEIGHT: float = 3.0  # Weight for REAL generators
 
 
 @dataclass
 class CONFIG:
-    MIN_TABLES: int = 6
-    MAX_TABLES: int = 8
-    MIN_COLUMNS_PER_TABLE: int = 5
-    MAX_COLUMNS_PER_TABLE: int = 20
-    MIN_ROWS_PER_TABLE: int = 1000
-    MAX_ROWS_PER_TABLE: int = 10000
-    NULL_PROBABILITY: float = 0.15
+    MIN_TABLES: int = 12
+    MAX_TABLES: int = 16
+    MIN_COLUMNS_PER_TABLE: int = 12
+    MAX_COLUMNS_PER_TABLE: int = 18
+    MIN_ROWS_PER_TABLE: int = 6000
+    MAX_ROWS_PER_TABLE: int = 6000
     LANGUAGES: tuple[str, ...] = ("hu", "en")
     COLUMN_NAME = COLUMN_NAME_CONFIG()
     GENERATOR_WEIGHTS = GENERATOR_TYPE_WEIGHTS()

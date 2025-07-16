@@ -7,11 +7,8 @@ from faker import Faker
 
 from column_names import ColumnNameGenerator
 from config import CONFIG
-from generator_definitions import (
-    get_all_generator_names,
-    get_generator_by_name,
-    get_weighted_generator_name,
-)
+from generator_definitions import get_random_generator_weighted
+from result_handler import ResultHandler
 
 fake = Faker(CONFIG.LANGUAGES)
 
@@ -21,12 +18,8 @@ class DatabaseGenerator:
         self.db_name = db_name
         self.connection = None
         self.cursor = None
-
-        # Initialize column name generator
         self.column_name_generator = ColumnNameGenerator()
-
-        # Get all available generator names
-        self.available_generators = get_all_generator_names()
+        self.result_handler = ResultHandler(db_name)
 
     def connect(self):
         """Establish connection to SQLite database"""
@@ -44,67 +37,64 @@ class DatabaseGenerator:
             self.connection.close()
             print("Database connection closed")
 
-    def generate_column_name_variant(self, generator_name: str) -> str:
-        """Generate a column name using the column name generator"""
-        return self.column_name_generator.get_random_column_name(generator_name)
-
     def generate_table_schema(
         self, table_name: str
-    ) -> Tuple[str, List[Tuple[str, str, Any]]]:
+    ) -> Tuple[str, List[Tuple[str, str, str, Any]]]:
         """Generate a random table schema with column names and types"""
-        num_columns = random.randint(3, 8)
+        num_columns = random.randint(CONFIG.MIN_COLUMNS_PER_TABLE, CONFIG.MAX_COLUMNS_PER_TABLE)
         columns: list[str] = []
-        column_definitions: list[Tuple[str, str, Any]] = []
+        column_definitions: list[Tuple[str, str, str, Any]] = []
 
         # Always add an ID column
         columns.append("id INTEGER PRIMARY KEY AUTOINCREMENT")
-        column_definitions.append(("id", "id", lambda: None))  # ID is auto-generated
+        column_definitions.append(
+            ("id", "id", "", lambda: None)
+        )  # ID is auto-generated
 
         used_names = set(["id"])
 
         for _ in range(num_columns - 1):  # -1 because we already added ID
             # Choose weighted random generator based on type preferences
-            generator_name = get_weighted_generator_name()
-            generator = get_generator_by_name(generator_name)
+            generator = get_random_generator_weighted()
+            generator_name = generator.get_name()
+            generator_label = generator.get_label()
 
             # Generate variant name and ensure uniqueness
-            col_name = self.generate_column_name_variant(generator_name)
+            col_name = self.column_name_generator.get_random_column_name(generator)
             counter = 1
             while col_name in used_names:
-                col_name = (
-                    f"{self.generate_column_name_variant(generator_name)}_{counter}"
-                )
+                col_name = f"{self.column_name_generator.get_random_column_name(generator)}_{counter}"
                 counter += 1
 
             used_names.add(col_name)
             columns.append(f"{col_name} {generator.sql_type}")
-            column_definitions.append((col_name, generator_name, generator))
+            column_definitions.append(
+                (col_name, generator_name, generator_label, generator)
+            )
 
         schema = f"CREATE TABLE {table_name} ({', '.join(columns)})"
         return schema, column_definitions
 
-    def should_be_null(self) -> bool:
-        """Determine if a value should be NULL based on probability"""
-        return random.random() < CONFIG.NULL_PROBABILITY
-
     def generate_row_data(
-        self, column_definitions: list[Tuple[str, str, Any]]
+        self, column_definitions: list[Tuple[str, str, str, Any]]
     ) -> list[Any]:
         """Generate data for a single row"""
         row_data: list[Any] = []
-        for col_name, _generator_name, generator in column_definitions:
+        for (
+            col_name,
+            _generator_name,
+            _generator_label,
+            generator,
+        ) in column_definitions:
             if col_name == "id":
                 continue  # Skip ID as it's auto-generated
 
-            if self.should_be_null():
+            try:
+                value = generator.generate_data()
+                row_data.append(value)
+            except Exception as e:
+                print(f"Error generating data for {col_name}: {e}")
                 row_data.append(None)
-            else:
-                try:
-                    value = generator.generate_data()
-                    row_data.append(value)
-                except Exception as e:
-                    print(f"Error generating data for {col_name}: {e}")
-                    row_data.append(None)
 
         return row_data
 
@@ -114,6 +104,13 @@ class DatabaseGenerator:
 
         # Generate schema
         schema, column_definitions = self.generate_table_schema(table_name)
+
+        # Log generator usage for each column (except ID)
+        for col_name, generator_name, generator_label, _ in column_definitions:
+            if col_name != "id":  # Skip ID column
+                self.result_handler.log_generator_usage(
+                    generator_name, generator_label, table_name, col_name
+                )
 
         # Create table
         try:
@@ -129,7 +126,7 @@ class DatabaseGenerator:
         print(f"Generating {num_rows} rows...")
 
         # Prepare INSERT statement
-        non_id_columns = [col for col, _, _ in column_definitions if col != "id"]
+        non_id_columns = [col for col, _, _, _ in column_definitions if col != "id"]
         placeholders = ", ".join(["?" for _ in non_id_columns])
         insert_sql = f"INSERT INTO {table_name} ({', '.join(non_id_columns)}) VALUES ({placeholders})"
 
@@ -166,8 +163,13 @@ class DatabaseGenerator:
         print(
             f"  - Rows per table: {CONFIG.MIN_ROWS_PER_TABLE}-{CONFIG.MAX_ROWS_PER_TABLE}"
         )
-        print(f"  - NULL probability: {CONFIG.NULL_PROBABILITY * 100}%")
         print(f"  - Languages: {CONFIG.LANGUAGES}")
+
+        # Create result folder structure
+        self.result_handler.create_result_folder()
+
+        # Update database path to be in the results folder
+        self.db_name = self.result_handler.get_database_path()
 
         self.connect()
 
@@ -180,8 +182,13 @@ class DatabaseGenerator:
             self.create_table(table_name)
 
         self.close()
+
+        # Finalize results - save generator log
+        self.result_handler.finalize_results()
+
         print("\nDatabase generation completed!")
         print(f"Database file: {self.db_name}")
+        print(f"Results saved in: {self.result_handler.get_result_folder_path()}")
 
     def show_database_info(self) -> None:
         """Display information about the generated database"""
